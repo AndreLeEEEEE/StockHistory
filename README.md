@@ -11,3 +11,5 @@ Versions of python and installed modules:
 
 Requirements:
 Plex login for Wanco
+
+I need to ask Kevin for the details again.
