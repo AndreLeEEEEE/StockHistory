@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import openpyxl
 import re
@@ -49,62 +50,81 @@ def select_drop(web_driver, id, value):
 
 def IT(driver):
     """Create an excel sheet detailing the use of components."""
-    parts = {}
-    containers = []
+    inactive_containers = {}
     def check_container():
-        part = get_by_name(driver, "txtPartNo").get_attribute("value")
-        if part not in parts:
-            parts[part] = [[]]
-        else:
-            parts[part].append([])
-
-        parts[part][-1].append(get_by_id(driver, "lblFormTitle"))
-        check_history()
-
-    def check_history():
+        #get_by_name(driver, "txtPartNo").get_attribute("value")  get part number
+        #get_by_id(driver, "lblFormTitle").text  get container number
+        #get_by_id(driver, "pikLocation").text  get location
         locate_by_id(driver, "lnkContainerHistory")
-        
+        time.sleep(1)
+        no_wraps = driver.find_elements_by_class_name("NoWrap")
+        #row_nums = len(no_wraps) / 22
+        # 22 columns, row indices are multiples of 22 (row one starts at index 0)
+        # 18 is the first index in the "Last Action" column
+        # 14 is the first index in the "Location" column
+        act = inact = 0
+        for row in range(row_nums):
+            if no_wraps[18+(row*22)].text == "Split Container":
+                if no_wraps[14+(row*22)].text == "SR RECEIV":
+                    continue
+                else:
+                    act += 1
+            elif no_wraps[18+(row*22)].text == "Cycle Complete" or no_wraps[18+(row*22)].text == "Container Move":
+                inact += 1
+
+        input("Program Pause")
+        raise(Exception)
+        locate_by_class(driver, "left-arrow-purple button")
 
     # Navigate to inventory tracking menu
-    menuNodes = ["tableMenuNode1", "tableMenuNode4", "tableMenuNode3", "tableMenuNode1"]
-    for node in menuNodes:
-        locate_by_id(driver, node)
-        time.sleep(0.5)
+    action = ActionChains(driver)
+    action.key_down(Keys.CONTROL).send_keys('M').key_up(Keys.CONTROL).perform()
+    action = 404
+    time.sleep(1)
+    action = ActionChains(driver)
+    action.send_keys("Inventory Tracking").send_keys(Keys.RETURN).perform()
+    action = 404
+    time.sleep(1)
+    action = ActionChains(driver)
+    action.send_keys(Keys.RETURN).perform()
 
     # Fill out the search criteria
     time.sleep(2)
-    select_drop(driver, "Layout1_el_385623", "Last_365_Days")
-    locs = ["SR00", "SR01", "SR02", "SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09",
-            "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09"]
+    input_box = get_by_name(driver, "Layout1$el_385621")
+    input_box.clear()
+    input_box.send_keys("1/1/2000")
+    input_box = get_by_name(driver, "Layout1$el_385622")
+    input_box.clear()
+    input_box.send_keys("11/20/2019")
+    locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
+            "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
     for loc in locs:  # Cycle through locations
-        input_box = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, "Layout1_el_6102")))
+        input_box = get_by_id(driver, "Layout1_el_6102")
         input_box.clear()
         input_box.send_keys(loc)
         locate_by_id(driver, "Layout1_el_56")
         time.sleep(1)
+
         # Find length of results
         links = driver.find_elements_by_xpath("//a[@href]")  # Get every link
         loc_links = 0  # This variable stores the amount of containers in one location
         for link in links:
             if re.search("ContainerForm", link.get_attribute("href")):
                 loc_links += 1
+        if loc_links == 0:  # If so results come up
+            continue  # Go to the next location
 
-        for index in range(loc_links):  # Cycle through result entries in one location
+        for index in range(loc_links):  # Cycle through containers in one location
             links = driver.find_elements_by_xpath("//a[@href]")  # Refresh the links
             encountered = 0
-            for link in links:  # Cycle through all links in one location
+            for link in links:  # Cycle through all container links in one location
                 if re.search("ContainerForm", link.get_attribute("href")):
                     if encountered == index:
                         link.click()
-                        time.sleep(1)
+                        check_container()
                         locate_by_id(driver, "btnBack_Label")
-                        print(parts)
-                        raise(Exception)
                         break
                     encountered += 1
-
-    input("Program Pause")
 
 
 try:
