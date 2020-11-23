@@ -52,14 +52,18 @@ def IT(driver):
     """Create an excel sheet detailing the use of components."""
     inactive_containers = {}
     def check_container():
-        #get_by_name(driver, "txtPartNo").get_attribute("value")  get part number
-        #get_by_id(driver, "lblFormTitle").text  get container number
-        #get_by_id(driver, "pikLocation").text  get location
+        # Get the container number, part number, and location
+        temp_part = get_by_name(driver, "txtPartNo").get_attribute("value")
+        temp_container = ((get_by_id(driver, "lblFormTitle").text).split())[2]
+        temp_location = get_by_id(driver, "pikLocation").text
+        # For now, add these to the dictionary
+        inactive_containers[temp_container] = [temp_part, temp_location]
+        # Check container history
         locate_by_id(driver, "lnkContainerHistory")
         time.sleep(1)
         no_wraps = driver.find_elements_by_class_name("NoWrap")
-        #row_nums = len(no_wraps) / 22
         # 22 columns, row indices are multiples of 22 (row one starts at index 0)
+        row_nums = int(len(no_wraps) / 22)
         # 18 is the first index in the "Last Action" column
         # 14 is the first index in the "Location" column
         act = inact = 0
@@ -71,10 +75,19 @@ def IT(driver):
                     act += 1
             elif no_wraps[18+(row*22)].text == "Cycle Complete" or no_wraps[18+(row*22)].text == "Container Move":
                 inact += 1
-
-        input("Program Pause")
-        raise(Exception)
-        locate_by_class(driver, "left-arrow-purple button")
+        # Deem the container active or inactive
+        if inact >= act:
+            if inact == 0:  # A zero ratio means that inact and act are zero
+                inactive_containers[temp_container].append(0)
+            elif act > 0:
+                inactive_containers[temp_container].append(inact/act)
+            else:  # If act is zero, but inact is more than zero, the ratio is infinity
+                inactive_containers[temp_container].append('inf')
+        else:
+            inactive_containers.popitem()
+        # Go back to the results page
+        locate_by_class(driver, "left-arrow-purple")
+        locate_by_id(driver, "btnBack_Label")
 
     # Navigate to inventory tracking menu
     action = ActionChains(driver)
@@ -96,8 +109,9 @@ def IT(driver):
     input_box = get_by_name(driver, "Layout1$el_385622")
     input_box.clear()
     input_box.send_keys("11/20/2019")
-    locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
-            "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
+    #locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
+    #        "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
+    locs = ["SR05"]
     for loc in locs:  # Cycle through locations
         input_box = get_by_id(driver, "Layout1_el_6102")
         input_box.clear()
@@ -122,20 +136,46 @@ def IT(driver):
                     if encountered == index:
                         link.click()
                         check_container()
-                        locate_by_id(driver, "btnBack_Label")
                         break
                     encountered += 1
 
+    # Write data to new excel sheet
+    wb_obj = openpyxl.Workbook()
+    sheet_obj = wb_obj.active
+    headers = ["Container Number", "Part Number", "Location", "Activity Ratio (inactive/active)"]
+    for i in range(1, 5):
+        sheet_obj.cell(row=1, column=i).value = headers[i-1]
+    for index, key in enumerate(inactive_containers):
+        sheet_obj.cell(row=index+2, column=1).value = key
+        sheet_obj.cell(row=index+2, column=2).value = inactive_containers[key][0]
+        sheet_obj.cell(row=index+2, column=3).value = inactive_containers[key][1]
+        sheet_obj.cell(row=index+2, column=4).value = inactive_containers[key][2]
+    # This creates a new excel workbook in the program's directory
+    wb_obj.save("Inactive Containers List.xlsx")
 
 try:
     # Getting into Plex
     driver = webdriver.Chrome("chromedriver.exe")
-    driver.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
-    # Will need to change the credentials later
-    driver.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    driver.find_element_by_name("txtPassword").send_keys("ThisExpires7")
-    driver.find_element_by_name("txtCompanyCode").send_keys("wanco")
-    locate_by_id(driver, "btnLogin")
+    driver.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
+
+    parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
+    # Enter in company code
+    form = driver.find_element_by_xpath(parent + "//div[@id='companyCodeInput']//div[@class='col-sm-12']//input[@id='inputCompanyCode3']")
+    form.send_keys("wanco")
+    action = ActionChains(driver)
+    action.send_keys(Keys.RETURN).perform()
+    time.sleep(.5)
+    # Enter in username
+    form = driver.find_element_by_xpath(parent + "//div[@id='usernameInput']//div[@class='col-sm-12']//input[@id='inputUsername3']")
+    form.send_keys("w.mc.tester")
+    action.perform()
+    time.sleep(.5)
+    # Enter in password
+    form = driver.find_element_by_xpath(parent + "//div[@id='passwordInput']//div[@class='col-sm-12']//input[@id='inputPassword3']")
+    form.send_keys("test1wanco")
+    action.perform()
+    time.sleep(.5)
+    
     driver.switch_to.window(driver.window_handles[1])
     time.sleep(3)
     IT(driver)
