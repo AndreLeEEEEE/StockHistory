@@ -29,5 +29,9 @@ instances of "Split Container" that don't count are the ones where the location 
 cotainer size for storage purposes. inact increases the more "Cycle Complete"'s and "Container Move"'s are found. If inact is larger than act, the container is 
 considered dead. Nothing else happens with active containers, but dead ones are put onto an excel sheet. Entries will have a container number, part number,
 location, and a ratio of inact to act to help the storage team figure out which dead containers to prioritize.
+The ratio can be on of three options, greater than zero, zero, and infinity. Greater than zero is achieved when act and inact are both larger than zero.
+Zero is achieved on the rare case that act and inact are both zero. In addition, containers with a 50/50 split between act and inact are included in the
+excel sheet. Infinity is the most common case for a ratio; this occurs when a container's inact is greater than zero, but its act is zero. Since a 
+division by zero would crash the program, infinity will be assigned instead.
 
 Given the time frame, I'd expect this program to be ran once a year or so.
