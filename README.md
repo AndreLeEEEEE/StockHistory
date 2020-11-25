@@ -34,4 +34,5 @@ Zero is achieved on the rare case that act and inact are both zero. In addition,
 excel sheet. Infinity is the most common case for a ratio; this occurs when a container's inact is greater than zero, but its act is zero. Since a 
 division by zero would crash the program, infinity will be assigned instead.
 
-Given the time frame, I'd expect this program to be ran once a year or so.
+Given the time frame, I'd expect this program to be ran once a year or so. 
+That's a good thing considering how just six locations makes this program run for roughly two hours.
