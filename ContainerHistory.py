@@ -109,9 +109,8 @@ def IT(driver):
     input_box = get_by_name(driver, "Layout1$el_385622")
     input_box.clear()
     input_box.send_keys("11/20/2019")
-    #locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
-    #        "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
-    locs = ["SR05"]
+    locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
+            "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
     for loc in locs:  # Cycle through locations
         input_box = get_by_id(driver, "Layout1_el_6102")
         input_box.clear()
