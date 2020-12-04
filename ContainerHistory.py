@@ -62,7 +62,7 @@ def IT(driver):
         # Check container history
         locate_by_id(driver, "lnkContainerHistory")
         time.sleep(1)
-        no_wraps = driver.find_elements_by_class_name("NoWrap")
+        no_wraps = driver.find_elements_by_class_name("NoWrap")  # This is a list
         # 22 columns, row indices are multiples of 22 (row one starts at index 0)
         row_nums = int(len(no_wraps) / 22)
         # 18 is the first index in the "Last Action" column
@@ -85,7 +85,7 @@ def IT(driver):
             else:  # If act is zero, but inact is more than zero, the ratio is infinity
                 inactive_containers[temp_container].append('inf')
         else:  # Active
-            inactive_containers.popitem()
+            inactive_containers.popitem()  # Remove the most recent addition to the dictionary
         # Go back to the results page
         locate_by_class(driver, "left-arrow-purple")
         locate_by_id(driver, "btnBack_Label")
@@ -112,25 +112,31 @@ def IT(driver):
     input_box.send_keys("11/25/2019")
     #locs = ["SR03", "SR04", "SR05", "SR06", "SR07", "SR08", "SR09", "SR10", "SR11", "SR12", "SR13", "SR14", "SR15",
     #        "C00", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11"]
-    locs = ["C06", "C07", "C08", "C09", "C10", "C11"]
+    # The big list is currently commented out since selenium can occasionally crash for no obvious reason,
+    # and these locations have many containers so it would suck if the program crashed in the middle of
+    # it all. Should this occur, the program would have to be closed and restarted, which means all progress
+    # is restarted.
+    locs = ["C06", "C07", "C08", "C09", "C10", "C11"]  # For now, use smaller lists with a fraction of the locations
     for loc in locs:  # Cycle through locations
+        # Find the location box and enter in the name
         input_box = get_by_id(driver, "Layout1_el_6102")
         input_box.clear()
         input_box.send_keys(loc)
+        # Find and click the search button
         locate_by_id(driver, "Layout1_el_56")
         time.sleep(1)
 
         # Find length of results
         links = driver.find_elements_by_xpath("//a[@href]")  # Get every link
         loc_links = 0  # This variable stores the amount of containers in one location
-        for link in links:
+        for link in links:  # Find all instances of a container link
             if re.search("ContainerForm", link.get_attribute("href")):
                 loc_links += 1
-        if loc_links == 0:  # If so results come up
+        if loc_links == 0:  # If no results come up
             continue  # Go to the next location
 
         for index in range(loc_links):  # Cycle through containers in one location
-            links = driver.find_elements_by_xpath("//a[@href]")  # Refresh the links
+            links = driver.find_elements_by_xpath("//a[@href]")  # "Refresh" the links
             encountered = 0
             for link in links:  # Cycle through all container links in one location
                 if re.search("ContainerForm", link.get_attribute("href")):
@@ -157,7 +163,7 @@ def IT(driver):
 try:
     # Getting into Plex
     driver = webdriver.Chrome("chromedriver.exe")
-    # Link to new Plex site
+    # Link to new Plex site which has a different login progress/screen
     driver.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
 
     parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
@@ -177,12 +183,13 @@ try:
     form.send_keys("test1wanco")
     action.perform()
     time.sleep(.5)
-    
+    # Since logging in through selenium opens up a new window instead of changing the current login screen,
+    # go to the new screen
     driver.switch_to.window(driver.window_handles[1])
     time.sleep(3)
     IT(driver)
 except Exception as e:
     print("An error was encountered:")
     print(e)
-finally:
+finally:  # Whether the operation was erroneous or successful, quit the driver
     driver.quit()
