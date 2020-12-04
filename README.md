@@ -13,6 +13,7 @@ Requirements:
 Plex login for Wanco
 
 Update 11/23/2020: I'm waiting on test Plex credentials so I can take my own out.
+
 Update 12/4/2020: I now have generic Plex credentials.
 
 In an effort to optimize the storage room and its containers, this program will find all inactive/dead containers in locations SR03 through SR15 and 
