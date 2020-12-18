@@ -116,7 +116,7 @@ def IT(driver):
     # and these locations have many containers so it would suck if the program crashed in the middle of
     # it all. Should this occur, the program would have to be closed and restarted, which means all progress
     # is restarted.
-    locs = ["C06", "C07", "C08", "C09", "C10", "C11"]  # For now, use smaller lists with a fraction of the locations
+    locs = ["SR03"]  # For now, use smaller lists with a fraction of the locations
     for loc in locs:  # Cycle through locations
         # Find the location box and enter in the name
         input_box = get_by_id(driver, "Layout1_el_6102")
@@ -163,26 +163,11 @@ def IT(driver):
 try:
     # Getting into Plex
     driver = webdriver.Chrome("chromedriver.exe")
-    # Link to new Plex site which has a different login progress/screen
-    driver.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
-
-    parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
-    # Enter in company code
-    form = driver.find_element_by_xpath(parent + "//div[@id='companyCodeInput']//div[@class='col-sm-12']//input[@id='inputCompanyCode3']")
-    form.send_keys("wanco")
-    action = ActionChains(driver)
-    action.send_keys(Keys.RETURN).perform()
-    time.sleep(.5)
-    # Enter in username
-    form = driver.find_element_by_xpath(parent + "//div[@id='usernameInput']//div[@class='col-sm-12']//input[@id='inputUsername3']")
-    form.send_keys("w.mc.tester")
-    action.perform()
-    time.sleep(.5)
-    # Enter in password
-    form = driver.find_element_by_xpath(parent + "//div[@id='passwordInput']//div[@class='col-sm-12']//input[@id='inputPassword3']")
-    form.send_keys("test1wanco")
-    action.perform()
-    time.sleep(.5)
+    remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
+    remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
+    remote.find_element_by_name("txtPassword").send_keys("ThisExpires7")
+    remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
+    locate_by_id(remote, "btnLogin")
     # Since logging in through selenium opens up a new window instead of changing the current login screen,
     # go to the new screen
     driver.switch_to.window(driver.window_handles[1])
