@@ -16,6 +16,8 @@ Update 11/23/2020: I'm waiting on test Plex credentials so I can take my own out
 
 Update 12/4/2020: I now have generic Plex credentials.
 
+Update 12/18/2020: Back to my credentials since the generic account got nerfed in terms of what pages it can access.
+
 In an effort to optimize the storage room and its containers, this program will find all inactive/dead containers in locations SR03 through SR15 and 
 C00 through C11. A container is deemed "dead" if there are more instances of "Cycle Complete" and "Container Move" than "Split Container" in the 
 "Last Action" column of its history.
