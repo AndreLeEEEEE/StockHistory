@@ -165,7 +165,7 @@ try:
     driver = webdriver.Chrome("chromedriver.exe")
     remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
     remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    remote.find_element_by_name("txtPassword").send_keys("ThisExpires7")
+    remote.find_element_by_name("txtPassword").send_keys("OokyOoki2")
     remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
     locate_by_id(remote, "btnLogin")
     # Since logging in through selenium opens up a new window instead of changing the current login screen,
